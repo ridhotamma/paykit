@@ -20,7 +20,7 @@ export default defineConfig({
     'http/index': 'src/http/index.ts',
   },
   format: ['esm', 'cjs'],
-  target: 'node18',
+  target: 'node20',
   dts: true,
   splitting: false,
   sourcemap: true,

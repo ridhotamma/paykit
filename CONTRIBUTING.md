@@ -11,7 +11,7 @@ npm test
 npm run build
 ```
 
-Requires Node.js 18+.
+Requires Node.js 20+.
 
 ## Adding a gateway
 

@@ -8,7 +8,7 @@ One small interface for every gateway, plus per-gateway subpaths when you need t
 npm install @ridhotamma/paykit
 ```
 
-Requires Node.js 18+. Ships ESM and CJS with full TypeScript declarations.
+Requires Node.js 20+ (Web Crypto is assumed to be global). Ships ESM and CJS with full TypeScript declarations.
 
 ---
 
