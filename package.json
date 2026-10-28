@@ -1,7 +1,7 @@
 {
   "name": "@ridhotamma/paykit",
-  "version": "0.1.0",
-  "description": "Provider-agnostic payment gateway adapters \u2014 Tripay, Duitku, Mayar, Midtrans, Xendit and PayPal \u2014 with first-class webhook verification.",
+  "version": "0.1.1",
+  "description": "Provider-agnostic payment gateway adapters — Tripay, Duitku, Mayar, Midtrans, Xendit and PayPal — with first-class webhook verification.",
   "keywords": [
     "payment",
     "payment-gateway",
