@@ -1,0 +1,117 @@
+{
+  "name": "paykit",
+  "version": "0.1.0",
+  "description": "Provider-agnostic payment gateway adapters \u2014 Tripay, Duitku, Mayar, Midtrans, Xendit and PayPal \u2014 with first-class webhook verification.",
+  "keywords": [
+    "payment",
+    "payment-gateway",
+    "tripay",
+    "duitku",
+    "mayar",
+    "midtrans",
+    "xendit",
+    "paypal",
+    "webhook",
+    "indonesia"
+  ],
+  "license": "MIT",
+  "author": "Ridho Tamma",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ridhotamma/paykit.git"
+  },
+  "homepage": "https://github.com/ridhotamma/paykit#readme",
+  "bugs": {
+    "url": "https://github.com/ridhotamma/paykit/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./universal": {
+      "types": "./dist/universal/index.d.ts",
+      "import": "./dist/universal/index.js",
+      "require": "./dist/universal/index.cjs"
+    },
+    "./tripay": {
+      "types": "./dist/tripay/index.d.ts",
+      "import": "./dist/tripay/index.js",
+      "require": "./dist/tripay/index.cjs"
+    },
+    "./duitku": {
+      "types": "./dist/duitku/index.d.ts",
+      "import": "./dist/duitku/index.js",
+      "require": "./dist/duitku/index.cjs"
+    },
+    "./mayar": {
+      "types": "./dist/mayar/index.d.ts",
+      "import": "./dist/mayar/index.js",
+      "require": "./dist/mayar/index.cjs"
+    },
+    "./midtrans": {
+      "types": "./dist/midtrans/index.d.ts",
+      "import": "./dist/midtrans/index.js",
+      "require": "./dist/midtrans/index.cjs"
+    },
+    "./xendit": {
+      "types": "./dist/xendit/index.d.ts",
+      "import": "./dist/xendit/index.js",
+      "require": "./dist/xendit/index.cjs"
+    },
+    "./paypal": {
+      "types": "./dist/paypal/index.d.ts",
+      "import": "./dist/paypal/index.js",
+      "require": "./dist/paypal/index.cjs"
+    },
+    "./providers": {
+      "types": "./dist/providers/registry.d.ts",
+      "import": "./dist/providers/registry.js",
+      "require": "./dist/providers/registry.cjs"
+    },
+    "./http": {
+      "types": "./dist/http/index.d.ts",
+      "import": "./dist/http/index.js",
+      "require": "./dist/http/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@types/midtrans-client": "^1.4.0",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@paypal/paypal-server-sdk": "^2.5.0",
+    "duitku-node-sdk": "^0.1.2",
+    "mayar-node-sdk": "2.0.0",
+    "midtrans-client": "^1.4.3",
+    "tripay-node-sdk": "^1.0.0",
+    "xendit-node": "^7.0.0",
+    "zod": "^4.6.2"
+  }
+}
