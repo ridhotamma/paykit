@@ -6,7 +6,7 @@
  * request/response types — so the webhook app stays a thin I/O shell around
  * these functions and the admin app can keep importing the metadata-only root
  * entry without pulling `node:crypto` into a browser bundle. That split is why
- * this module lives behind the `@repo/integrations/duitku` subpath.
+ * this module lives behind the `paykit/duitku` subpath.
  *
  * The flow this serves:
  *

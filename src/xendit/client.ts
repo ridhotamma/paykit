@@ -4,7 +4,7 @@
  *
  * Server-only by contract: the secret key moves money and must never reach
  * a browser bundle. That is why this module lives behind the
- * `@repo/integrations/xendit` subpath and is never re-exported from the main
+ * `paykit/xendit` subpath and is never re-exported from the main
  * barrel — the admin UI imports the registry from `.`, servers import the
  * logic from `./xendit`.
  *

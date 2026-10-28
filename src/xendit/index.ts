@@ -2,7 +2,7 @@
  * Xendit server-side glue: credential handling, channel catalogue and
  * charge preparation for PayKit.
  *
- * Import from `@repo/integrations/xendit`, never from the main barrel: the
+ * Import from `paykit/xendit`, never from the main barrel: the
  * main barrel is consumed by browser bundles (the admin integration UI), and
  * this module pulls in the API client and callback verification, which must
  * not ship to a client.

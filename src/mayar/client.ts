@@ -4,7 +4,7 @@
  *
  * Server-only by contract: the API key moves money and must never reach a
  * browser bundle. That is why this module lives behind the
- * `@repo/integrations/mayar` subpath and is never re-exported from the main
+ * `paykit/mayar` subpath and is never re-exported from the main
  * barrel — the admin UI imports the registry from `.`, servers import the
  * logic from `./mayar`.
  *

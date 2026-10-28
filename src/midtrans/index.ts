@@ -2,7 +2,7 @@
  * Midtrans server-side glue: credential handling, channel catalogue and
  * charge preparation for PayKit.
  *
- * Import from `@repo/integrations/midtrans`, never from the main barrel: the
+ * Import from `paykit/midtrans`, never from the main barrel: the
  * main barrel is consumed by browser bundles (the admin integration UI), and
  * this module pulls in the API client and signature verification, which must
  * not ship to a client.
