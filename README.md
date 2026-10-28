@@ -5,7 +5,7 @@ Provider-agnostic payment gateway adapters for Node.js — **Tripay, Duitku, May
 One small interface for every gateway, plus per-gateway subpaths when you need the raw provider details.
 
 ```bash
-npm install paykit
+npm install @ridhotamma/paykit
 ```
 
 Requires Node.js 18+. Ships ESM and CJS with full TypeScript declarations.
@@ -37,7 +37,7 @@ Every Indonesian payment gateway speaks a slightly different dialect: different 
 ### The universal adapter
 
 ```ts
-import { getPaymentAdapter } from 'paykit/universal'
+import { getPaymentAdapter } from '@ridhotamma/paykit/universal'
 
 const adapter = getPaymentAdapter('midtrans')
 if (!adapter) throw new Error('Unknown gateway')
@@ -78,16 +78,16 @@ import {
   buildMidtransSnapBody,
   readMidtransCredentials,
   verifyMidtransNotification,
-} from 'paykit/midtrans'
+} from '@ridhotamma/paykit/midtrans'
 ```
 
 ```ts
-import { readTripayCredentials, createTripayClient } from 'paykit/tripay'
-import { readXenditCredentials, createXenditClient } from 'paykit/xendit'
-import { readMayarCredentials, createMayarClient } from 'paykit/mayar'
-import { readDuitkuCredentials, createDuitkuClient } from 'paykit/duitku'
-import { readPaypalCredentials, createPaypalClients } from 'paykit/paypal'
-import { readMidtransCredentials, createMidtransSnapClient } from 'paykit/midtrans'
+import { readTripayCredentials, createTripayClient } from '@ridhotamma/paykit/tripay'
+import { readXenditCredentials, createXenditClient } from '@ridhotamma/paykit/xendit'
+import { readMayarCredentials, createMayarClient } from '@ridhotamma/paykit/mayar'
+import { readDuitkuCredentials, createDuitkuClient } from '@ridhotamma/paykit/duitku'
+import { readPaypalCredentials, createPaypalClients } from '@ridhotamma/paykit/paypal'
+import { readMidtransCredentials, createMidtransSnapClient } from '@ridhotamma/paykit/midtrans'
 ```
 
 ## Webhooks
@@ -108,8 +108,8 @@ provider ──POST──▶ your endpoint
 Each gateway exposes a verifier that throws a `WebhookAuthError` (status `401`) on an unauthenticated sender, so a misconfiguration surfaces in the provider's dashboard instead of being silently accepted.
 
 ```ts
-import { verifyMidtransNotification } from 'paykit/midtrans'
-import { WebhookAuthError } from 'paykit'
+import { verifyMidtransNotification } from '@ridhotamma/paykit/midtrans'
+import { WebhookAuthError } from '@ridhotamma/paykit'
 
 try {
   const notification = await verifyMidtransNotification(
@@ -140,7 +140,7 @@ Equivalent entry points per gateway:
 Verification answers *"is this real?"*. The payment planners answer *"what should change?"* — as a value you can inspect, log and replay, never as a write:
 
 ```ts
-import { planMidtransPaymentUpdate } from 'paykit/midtrans'
+import { planMidtransPaymentUpdate } from '@ridhotamma/paykit/midtrans'
 
 // `transaction` is the status API's answer, not the callback's claims.
 const plan = planMidtransPaymentUpdate(order, transaction)
@@ -166,17 +166,17 @@ PayKit gives you no `settleOrder()` because settling an order is app-specific (i
 Providers differ on which fields are secret, which environment names they use, and what a missing key means. PayKit standardises the read:
 
 ```ts
-import { readMidtransCredentials } from 'paykit/midtrans'
+import { readMidtransCredentials } from '@ridhotamma/paykit/midtrans'
 
 const result = readMidtransCredentials(storedCredentials, storedConfig)
 if (!result.ok) throw new Error(result.error)   // e.g. "Server Key is required."
 const { serverKey, merchantId, environment } = result.credentials
 ```
 
-`paykit` also ships the provider metadata registry that powers a credential form:
+`@ridhotamma/paykit` also ships the provider metadata registry that powers a credential form:
 
 ```ts
-import { PROVIDER_REGISTRY, getProvider } from 'paykit/providers'
+import { PROVIDER_REGISTRY, getProvider } from '@ridhotamma/paykit/providers'
 
 getProvider('paypal')?.credentialFields
 // [{ key: 'clientId', label: 'Client ID', required: true }, …]
@@ -184,14 +184,14 @@ getProvider('paypal')?.credentialFields
 
 ### Encrypting credentials at rest
 
-`paykit` includes an optional AES-256-GCM envelope for the credentials blob, so a leaked database dump is not a leaked set of gateway keys. The key is read from `INTEGRATION_CREDENTIALS_KEY` (64 hex characters — 32 bytes):
+`@ridhotamma/paykit` includes an optional AES-256-GCM envelope for the credentials blob, so a leaked database dump is not a leaked set of gateway keys. The key is read from `INTEGRATION_CREDENTIALS_KEY` (64 hex characters — 32 bytes):
 
 ```bash
 export INTEGRATION_CREDENTIALS_KEY=$(openssl rand -hex 32)
 ```
 
 ```ts
-import { sealCredentials, openCredentials } from 'paykit'
+import { sealCredentials, openCredentials } from '@ridhotamma/paykit'
 
 const sealed = await sealCredentials({ apiKey: '…' })   // → '{"v":1,"iv":"…","data":"…"}'
 const plain = await openCredentials(sealed)             // → { apiKey: '…' }
@@ -202,7 +202,7 @@ It accepts legacy plaintext JSON too, so old rows keep working and seal on their
 ## Amounts and currency
 
 ```ts
-import { minorUnitDigits, paymentStatusFor, canTransitionOrder } from 'paykit'
+import { minorUnitDigits, paymentStatusFor, canTransitionOrder } from '@ridhotamma/paykit'
 
 minorUnitDigits('IDR')            // 0
 minorUnitDigits('USD')            // 2
@@ -217,7 +217,7 @@ Gateways that only settle in one currency (Midtrans, Xendit → IDR) or bind a c
 Gateway responses carry logos, but fetching them needs live credentials. PayKit resolves a channel code to a stable slug instead:
 
 ```ts
-import { digitalChannelLogoPath } from 'paykit'
+import { digitalChannelLogoPath } from '@ridhotamma/paykit'
 
 digitalChannelLogoPath('tripay', 'BCAVA')                    // '/payment-logos/bca.svg'
 digitalChannelLogoPath('tripay', 'BCAVA', '/assets/logos')   // '/assets/logos/bca.svg'
@@ -229,16 +229,16 @@ Host the marks wherever you like; `null` means no vendored mark exists.
 
 | Import | Contains |
 | ------ | -------- |
-| `paykit` | Contracts, provider registry, credentials, envelopes, order/money primitives. **No vendor SDK.** |
-| `paykit/universal` | `UniversalPaymentAdapter` registry + all six adapters |
-| `paykit/tripay` … `paykit/paypal` | One gateway: SDK client, charge builder, webhook verifier, planner |
-| `paykit/providers` | Static provider metadata (credential fields, docs links) |
-| `paykit/http` | SSRF-hardened `safeFetch` used by adapters |
+| `@ridhotamma/paykit` | Contracts, provider registry, credentials, envelopes, order/money primitives. **No vendor SDK.** |
+| `@ridhotamma/paykit/universal` | `UniversalPaymentAdapter` registry + all six adapters |
+| `@ridhotamma/paykit/tripay` … `@ridhotamma/paykit/paypal` | One gateway: SDK client, charge builder, webhook verifier, planner |
+| `@ridhotamma/paykit/providers` | Static provider metadata (credential fields, docs links) |
+| `@ridhotamma/paykit/http` | SSRF-hardened `safeFetch` used by adapters |
 
 ## Security notes
 
 - Callbacks are verified with constant-time comparison; secrets never appear in error messages.
-- `paykit/http` resolves DNS and refuses private/loopback addresses, so a user-supplied callback URL cannot be used to reach your internal network.
+- `@ridhotamma/paykit/http` resolves DNS and refuses private/loopback addresses, so a user-supplied callback URL cannot be used to reach your internal network.
 - Never trust the amounts in a callback. PayKit's planners are built around reading the transaction back from the provider's API before moving money.
 - Credential envelopes fail closed: a sealed blob handed `{}` or the wrong key throws rather than degrading to an empty credential set.
 

@@ -1,7 +1,7 @@
 /**
  * PayPal integration — server-only business logic.
  *
- * Import from `paykit/paypal`, never from the main barrel: the
+ * Import from `@ridhotamma/paykit/paypal`, never from the main barrel: the
  * main barrel is consumed by browser bundles (the admin integration UI), and
  * this module pulls in the REST client and signature verification, which
  * must not ship to a client.

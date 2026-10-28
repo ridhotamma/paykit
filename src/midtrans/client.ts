@@ -4,7 +4,7 @@
  *
  * Server-only by contract: the server key moves money and must never reach
  * a browser bundle. That is why this module lives behind the
- * `paykit/midtrans` subpath and is never re-exported from the
+ * `@ridhotamma/paykit/midtrans` subpath and is never re-exported from the
  * main barrel — the admin UI imports the registry from `.`, servers import
  * the logic from `./midtrans`.
  *

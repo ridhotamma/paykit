@@ -4,7 +4,7 @@
  * The root barrel exports the provider-agnostic surface: contracts, registry,
  * credential handling and the small primitives every adapter shares. Vendor
  * SDKs are deliberately *not* reachable from here — import a gateway through
- * its own subpath (`paykit/midtrans`, `paykit/xendit`, …) so a bundle only
+ * its own subpath (`@ridhotamma/paykit/midtrans`, `@ridhotamma/paykit/xendit`, …) so a bundle only
  * pulls the SDK it actually uses.
  */
 
@@ -23,7 +23,7 @@ export { timingSafeEqual } from './timing-safe'
 
 /**
  * Contracts only — types are erased at build time, so importing the root does
- * not pull a single vendor SDK. Import `paykit/universal` for the registry
+ * not pull a single vendor SDK. Import `@ridhotamma/paykit/universal` for the registry
  * (which necessarily loads every adapter) or a gateway subpath for one.
  */
 export type * from './universal/types'
