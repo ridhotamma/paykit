@@ -68,6 +68,10 @@ const CHANNEL_SLUGS: Readonly<Record<string, string>> = {
   PERMATA: 'permata',
   BSI: 'bsi',
   LINKAJA: 'linkaja',
+  // Aulaa aliases (the rest reuse the codes above).
+  CIMB_NIAGA_VA: 'cimb-niaga',
+  MAYBANK_VA: 'maybank',
+  SHOPEE_PAY: 'shopee-pay',
 }
 
 /**

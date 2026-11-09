@@ -1,3 +1,4 @@
+import { aulaaAdapter } from './adapters/aulaa'
 import { duitkuAdapter } from './adapters/duitku'
 import { mayarAdapter } from './adapters/mayar'
 import { midtransAdapter } from './adapters/midtrans'
@@ -24,6 +25,7 @@ const ADAPTERS: Readonly<Record<string, UniversalPaymentAdapter>> = {
   paypal: paypalAdapter,
   midtrans: midtransAdapter,
   xendit: xenditAdapter,
+  aulaa: aulaaAdapter,
 }
 
 /** The adapter for `provider`, or `undefined` when it is not implemented. */

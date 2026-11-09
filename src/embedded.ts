@@ -31,6 +31,7 @@ export type EmbeddedCheckoutSdk =
   | 'midtrans-snap'
   | 'xendit-components'
   | 'paypal-js'
+  | 'aulaa-checkout'
 
 /**
  * How to drive one provider's browser SDK.
@@ -198,6 +199,34 @@ export function paypalEmbeddedCheckout(
       source: paypalSdkUrl(clientId, currency),
       token: orderId,
       clientKey: clientId,
+    },
+  }
+}
+
+/** Aulaa's embedded-checkout library. */
+export const AULAA_EMBED_SCRIPT_URL = 'https://payment.aulaa.co/embed.js'
+
+/**
+ * Aulaa Embedded Checkout — the provider's own overlay.
+ *
+ * The storefront loads {@link AULAA_EMBED_SCRIPT_URL} and calls
+ * `Aulaa.checkout.open(paymentLink, { onSuccess, onClose })`. The overlay
+ * renders Aulaa's payment page on top of the shop, closes itself after
+ * payment, and only accepts websites registered on the project (https).
+ *
+ * The `payment_link` is the token: unlike the API-based SDKs, Aulaa opens the
+ * checkout from the link the server already created. It is also the iframe/
+ * redirect fallback.
+ */
+export function aulaaEmbeddedCheckout(paymentLink: string): EmbeddedCheckout {
+  return {
+    provider: 'aulaa',
+    preferred: 'script',
+    iframeUrl: paymentLink,
+    script: {
+      sdk: 'aulaa-checkout',
+      source: AULAA_EMBED_SCRIPT_URL,
+      token: paymentLink,
     },
   }
 }

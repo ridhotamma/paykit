@@ -1,11 +1,12 @@
 {
   "name": "@ridhotamma/paykit",
   "version": "0.1.1",
-  "description": "Provider-agnostic payment gateway adapters — Tripay, Duitku, Mayar, Midtrans, Xendit and PayPal — with first-class webhook verification.",
+  "description": "Provider-agnostic payment gateway adapters — Tripay, Aulaa, Duitku, Mayar, Midtrans, Xendit and PayPal — with first-class webhook verification.",
   "keywords": [
     "payment",
     "payment-gateway",
     "tripay",
+    "aulaa",
     "duitku",
     "mayar",
     "midtrans",
@@ -55,6 +56,11 @@
       "types": "./dist/tripay/index.d.ts",
       "import": "./dist/tripay/index.js",
       "require": "./dist/tripay/index.cjs"
+    },
+    "./aulaa": {
+      "types": "./dist/aulaa/index.d.ts",
+      "import": "./dist/aulaa/index.js",
+      "require": "./dist/aulaa/index.cjs"
     },
     "./duitku": {
       "types": "./dist/duitku/index.d.ts",

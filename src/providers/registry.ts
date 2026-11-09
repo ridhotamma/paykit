@@ -14,6 +14,51 @@ import type { ProviderDefinition } from '../types'
 /* Payment providers                                                          */
 /* -------------------------------------------------------------------------- */
 
+const aulaa: ProviderDefinition = {
+  id: 'aulaa',
+  category: 'payment',
+  name: 'Aulaa',
+  description: 'Payment links covering QRIS, virtual accounts, e-wallets, retail and cards.',
+  credentialFields: [
+    {
+      key: 'apiKey',
+      label: 'API Key',
+      type: 'password',
+      required: true,
+      placeholder: 'pgw_id_…',
+      hint: 'From Dashboard → Projects → API Keys. Shown once when created.',
+      guide: [
+        'Open the project you want PayKit to charge for.',
+        'Under API Keys, click Buat API Key and copy the value immediately.',
+        'The project must be type API and, for live payments, already approved.',
+      ],
+    },
+    {
+      key: 'webhookSecret',
+      label: 'Webhook Secret',
+      type: 'password',
+      required: true,
+      hint: 'From Dashboard → Projects → the Webhook section.',
+      guide: [
+        'Aulaa signs every callback with this secret (X-Webhook-Signature).',
+        'Rotating it is safe and needs no project review.',
+      ],
+    },
+    {
+      key: 'callbackUrl',
+      label: 'Webhook URL',
+      hint: 'Paste this into Dashboard → Projects → Webhook.',
+      guide: [
+        'Aulaa keeps one callback URL per project, so it applies to every transaction.',
+        'Changing it on an approved project triggers a review — set it before going live.',
+      ],
+      placeholder: 'https://pay.example.com/store/{slug}/aulaa',
+    },
+  ],
+  signupUrl: 'https://aulaa.co/sign-up',
+  docsUrl: 'https://aulaa.co/dokumentasi',
+}
+
 const tripay: ProviderDefinition = {
   id: 'tripay',
   category: 'payment',
@@ -293,11 +338,12 @@ export const PROVIDER_REGISTRY: Record<string, ProviderDefinition> = {
   paypal,
   midtrans,
   xendit,
+  aulaa,
 }
 
 /** Providers grouped by category, for the integrations list page. */
 export const PROVIDERS_BY_CATEGORY: Record<string, ProviderDefinition[]> = {
-  payment: [mayar, tripay, duitku, paypal, midtrans, xendit],
+  payment: [mayar, tripay, duitku, paypal, midtrans, xendit, aulaa],
 }
 
 /** Look up a single provider definition. Returns `undefined` for unknown ids. */

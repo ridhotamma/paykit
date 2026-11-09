@@ -1,6 +1,6 @@
 # PayKit
 
-Provider-agnostic payment gateway adapters for Node.js — **Tripay, Duitku, Mayar, Midtrans, Xendit and PayPal** — with typed credential handling, charge building, status reconciliation and first-class **webhook verification**.
+Provider-agnostic payment gateway adapters for Node.js — **Tripay, Aulaa, Duitku, Mayar, Midtrans, Xendit and PayPal** — with typed credential handling, charge building, status reconciliation and first-class **webhook verification**.
 
 One small interface for every gateway, plus per-gateway subpaths when you need the raw provider details.
 
@@ -16,7 +16,7 @@ Requires Node.js 20+ (Web Crypto is assumed to be global). Ships ESM and CJS wit
 
 Every Indonesian payment gateway speaks a slightly different dialect: different channel codes, different amount formats, different callback authentication, different expiry units. PayKit normalises the parts that are the same and keeps the parts that differ honest.
 
-- **One contract.** `UniversalPaymentAdapter` — `getChannels`, `charge`, `refresh`, `testConnection` — for all six gateways.
+- **One contract.** `UniversalPaymentAdapter` — `getChannels`, `charge`, `refresh`, `testConnection` — for every supported gateway.
 - **Verified callbacks.** Signature/HMAC/token verification that returns a *decision*, not a database write.
 - **No hidden state.** Nothing talks to a database, an ORM or a framework. Pure functions over `fetch` and the provider SDK.
 - **Escape hatches.** Every gateway subpath re-exports its SDK types and helpers, so you are never boxed in by the abstraction.
@@ -26,6 +26,7 @@ Every Indonesian payment gateway speaks a slightly different dialect: different 
 | Gateway  | Channels | Charge | Status refresh | Webhook verification | Embedded checkout |
 | -------- | :------: | :----: | :------------: | :------------------: | :---------------: |
 | Tripay   |    ✅    |   ✅   |       ✅       |    HMAC-SHA256       | iframe            |
+| Aulaa    |    ✅    |   ✅   |       ✅       |    HMAC-SHA256       | Embed JS          |
 | Duitku   |    ✅    |   ✅   |       ✅       |    MD5 signature     | Pop JS            |
 | Mayar    |    ✅    |   ✅   |       ✅       |    Callback token    | iframe            |
 | Midtrans |    ✅    |   ✅   |       ✅       |    SHA-512 digest    | Snap JS           |
@@ -83,6 +84,7 @@ import {
 
 ```ts
 import { readTripayCredentials, createTripayClient } from '@ridhotamma/paykit/tripay'
+import { readAulaaCredentials, createAulaaPayment } from '@ridhotamma/paykit/aulaa'
 import { readXenditCredentials, createXenditClient } from '@ridhotamma/paykit/xendit'
 import { readMayarCredentials, createMayarClient } from '@ridhotamma/paykit/mayar'
 import { readDuitkuCredentials, createDuitkuClient } from '@ridhotamma/paykit/duitku'
@@ -128,6 +130,7 @@ Provider specifics:
 
 | Gateway | `checkout: 'embedded'` | Frontend |
 | ------- | ---------------------- | -------- |
+| Aulaa | No API change; the payment link is the token. | Load `https://payment.aulaa.co/embed.js`, call `Aulaa.checkout.open(paymentLink, { onSuccess, onClose })`. The embedding website must be registered on the project (https; `localhost` works in sandbox). |
 | Duitku | No API change; still returns the hosted `paymentUrl` as fallback. | Load `duitku.js`, call `checkout.process(reference, options)`. |
 | Xendit | Creates a `COMPONENTS` Payment Session and returns `components_sdk_key`. Requires `embedOrigins`. | Use `xendit-components-web`; mount the channel components into your own containers and submit from your button. |
 | Midtrans | No API change; the Snap token is returned. | Load `snap.js` with `data-client-key`, then `snap.embed(token, { embedId })` or `snap.pay(token)`. |
@@ -184,6 +187,7 @@ Equivalent entry points per gateway:
 | Gateway  | Verifier |
 | -------- | -------- |
 | Tripay   | `tripay-node-sdk` callback parsing (throws `TripaySignatureError`) |
+| Aulaa    | `verifyAulaaCallback` (HMAC-SHA256 over the raw body) |
 | Duitku   | `parseDuitkuCallbackBody` + `duitkuCallbackSchema` |
 | Mayar    | `verifyMayarCallback` |
 | Midtrans | `verifyMidtransNotification` |
@@ -285,8 +289,8 @@ Host the marks wherever you like; `null` means no vendored mark exists.
 | Import | Contains |
 | ------ | -------- |
 | `@ridhotamma/paykit` | Contracts, provider registry, credentials, envelopes, order/money primitives. **No vendor SDK.** |
-| `@ridhotamma/paykit/universal` | `UniversalPaymentAdapter` registry + all six adapters |
-| `@ridhotamma/paykit/tripay` … `@ridhotamma/paykit/paypal` | One gateway: SDK client, charge builder, webhook verifier, planner |
+| `@ridhotamma/paykit/universal` | `UniversalPaymentAdapter` registry + every adapter |
+| `@ridhotamma/paykit/aulaa`, `/duitku`, `/mayar`, `/midtrans`, `/paypal`, `/tripay`, `/xendit` | One gateway: API client, charge builder, webhook verifier, planner |
 | `@ridhotamma/paykit/providers` | Static provider metadata (credential fields, docs links) |
 | `@ridhotamma/paykit/http` | SSRF-hardened `safeFetch` used by adapters |
 

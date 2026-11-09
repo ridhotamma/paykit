@@ -22,6 +22,7 @@ export type IntegrationProvider =
   | 'midtrans'
   | 'xendit'
   | 'paypal'
+  | 'aulaa'
 
 /** The lifecycle state of a connection — not the provider itself. */
 export type ConnectionStatus = 'connected' | 'disconnected' | 'error'

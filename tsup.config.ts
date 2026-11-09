@@ -11,6 +11,7 @@ export default defineConfig({
     index: 'src/index.ts',
     'universal/index': 'src/universal/index.ts',
     'tripay/index': 'src/tripay/index.ts',
+    'aulaa/index': 'src/aulaa/index.ts',
     'duitku/index': 'src/duitku/index.ts',
     'mayar/index': 'src/mayar/index.ts',
     'midtrans/index': 'src/midtrans/index.ts',

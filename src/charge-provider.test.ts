@@ -13,6 +13,9 @@ describe('orderChargeProvider', () => {
     expect(orderChargeProvider({ paymentLink: 'https://app.midtrans.com/snap/v4/x' })).toBe(
       'midtrans',
     )
+    expect(
+      orderChargeProvider({ paymentLink: 'https://payment.aulaa.co/pay/f47ac10b' }),
+    ).toBe('aulaa')
   })
 
   test('a look-alike host is not the gateway', () => {

@@ -13,6 +13,7 @@ export const GATEWAY_LINK_HOSTS: ReadonlyArray<
   readonly [provider: string, hosts: readonly string[]]
 > = [
   ['tripay', ['tripay.co.id']],
+  ['aulaa', ['aulaa.co']],
   ['duitku', ['duitku.com']],
   ['mayar', ['mayar.id', 'mayar.link', 'mayar.club', 'myr.id']],
   ['midtrans', ['midtrans.com']],

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import {
+  aulaaEmbeddedCheckout,
   duitkuEmbeddedCheckout,
   duitkuJsUrl,
   iframeEmbeddedCheckout,
@@ -109,6 +110,23 @@ describe('PayPal embedded checkout', () => {
     expect(checkout.script?.sdk).toBe('paypal-js')
     expect(checkout.script?.token).toBe('ORDER-1')
     expect(checkout.script?.clientKey).toBe('client-id')
+  })
+})
+
+describe('Aulaa embedded checkout', () => {
+  test('opens the payment link through the provider overlay script', () => {
+    const checkout = aulaaEmbeddedCheckout('https://payment.aulaa.co/pay/f47ac10b')
+
+    expect(checkout).toEqual({
+      provider: 'aulaa',
+      preferred: 'script',
+      iframeUrl: 'https://payment.aulaa.co/pay/f47ac10b',
+      script: {
+        sdk: 'aulaa-checkout',
+        source: 'https://payment.aulaa.co/embed.js',
+        token: 'https://payment.aulaa.co/pay/f47ac10b',
+      },
+    })
   })
 })
 
