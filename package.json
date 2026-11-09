@@ -1,6 +1,6 @@
 {
   "name": "@ridhotamma/paykit",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Provider-agnostic payment gateway adapters — Tripay, Aulaa, DOKU, Duitku, Mayar, Midtrans, Xendit and PayPal — with first-class webhook verification.",
   "keywords": [
     "payment",
