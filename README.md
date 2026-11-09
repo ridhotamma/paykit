@@ -1,6 +1,6 @@
 # PayKit
 
-Provider-agnostic payment gateway adapters for Node.js — **Tripay, Aulaa, Duitku, Mayar, Midtrans, Xendit and PayPal** — with typed credential handling, charge building, status reconciliation and first-class **webhook verification**.
+Provider-agnostic payment gateway adapters for Node.js — **Tripay, Aulaa, DOKU, Duitku, Mayar, Midtrans, Xendit and PayPal** — with typed credential handling, charge building, status reconciliation and first-class **webhook verification**.
 
 One small interface for every gateway, plus per-gateway subpaths when you need the raw provider details.
 
@@ -27,6 +27,7 @@ Every Indonesian payment gateway speaks a slightly different dialect: different 
 | -------- | :------: | :----: | :------------: | :------------------: | :---------------: |
 | Tripay   |    ✅    |   ✅   |       ✅       |    HMAC-SHA256       | iframe            |
 | Aulaa    |    ✅    |   ✅   |       ✅       |    HMAC-SHA256       | Embed JS          |
+| DOKU     |    ✅    |   ✅   |       ✅       |    HMAC-SHA256       | Checkout JS       |
 | Duitku   |    ✅    |   ✅   |       ✅       |    MD5 signature     | Pop JS            |
 | Mayar    |    ✅    |   ✅   |       ✅       |    Callback token    | iframe            |
 | Midtrans |    ✅    |   ✅   |       ✅       |    SHA-512 digest    | Snap JS           |
@@ -85,6 +86,7 @@ import {
 ```ts
 import { readTripayCredentials, createTripayClient } from '@ridhotamma/paykit/tripay'
 import { readAulaaCredentials, createAulaaPayment } from '@ridhotamma/paykit/aulaa'
+import { readDokuCredentials, createDokuCheckout } from '@ridhotamma/paykit/doku'
 import { readXenditCredentials, createXenditClient } from '@ridhotamma/paykit/xendit'
 import { readMayarCredentials, createMayarClient } from '@ridhotamma/paykit/mayar'
 import { readDuitkuCredentials, createDuitkuClient } from '@ridhotamma/paykit/duitku'
@@ -131,6 +133,7 @@ Provider specifics:
 | Gateway | `checkout: 'embedded'` | Frontend |
 | ------- | ---------------------- | -------- |
 | Aulaa | No API change; the payment link is the token. | Load `https://payment.aulaa.co/embed.js`, call `Aulaa.checkout.open(paymentLink, { onSuccess, onClose })`. The embedding website must be registered on the project (https; `localhost` works in sandbox). |
+| DOKU | No API change; the hosted checkout URL is the token. | Load `jokul-checkout-1.0.0.js` and call `loadJokulCheckout(paymentUrl)` to open it as a modal. |
 | Duitku | No API change; still returns the hosted `paymentUrl` as fallback. | Load `duitku.js`, call `checkout.process(reference, options)`. |
 | Xendit | Creates a `COMPONENTS` Payment Session and returns `components_sdk_key`. Requires `embedOrigins`. | Use `xendit-components-web`; mount the channel components into your own containers and submit from your button. |
 | Midtrans | No API change; the Snap token is returned. | Load `snap.js` with `data-client-key`, then `snap.embed(token, { embedId })` or `snap.pay(token)`. |
@@ -188,6 +191,7 @@ Equivalent entry points per gateway:
 | -------- | -------- |
 | Tripay   | `tripay-node-sdk` callback parsing (throws `TripaySignatureError`) |
 | Aulaa    | `verifyAulaaCallback` (HMAC-SHA256 over the raw body) |
+| DOKU     | `verifyDokuNotification` (HMAC-SHA256 of the signed header set + body digest) |
 | Duitku   | `parseDuitkuCallbackBody` + `duitkuCallbackSchema` |
 | Mayar    | `verifyMayarCallback` |
 | Midtrans | `verifyMidtransNotification` |
@@ -290,7 +294,7 @@ Host the marks wherever you like; `null` means no vendored mark exists.
 | ------ | -------- |
 | `@ridhotamma/paykit` | Contracts, provider registry, credentials, envelopes, order/money primitives. **No vendor SDK.** |
 | `@ridhotamma/paykit/universal` | `UniversalPaymentAdapter` registry + every adapter |
-| `@ridhotamma/paykit/aulaa`, `/duitku`, `/mayar`, `/midtrans`, `/paypal`, `/tripay`, `/xendit` | One gateway: API client, charge builder, webhook verifier, planner |
+| `@ridhotamma/paykit/aulaa`, `/doku`, `/duitku`, `/mayar`, `/midtrans`, `/paypal`, `/tripay`, `/xendit` | One gateway: API client, charge builder, webhook verifier, planner |
 | `@ridhotamma/paykit/providers` | Static provider metadata (credential fields, docs links) |
 | `@ridhotamma/paykit/http` | SSRF-hardened `safeFetch` used by adapters |
 

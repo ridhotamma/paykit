@@ -59,6 +59,52 @@ const aulaa: ProviderDefinition = {
   docsUrl: 'https://aulaa.co/dokumentasi',
 }
 
+const doku: ProviderDefinition = {
+  id: 'doku',
+  category: 'payment',
+  name: 'DOKU',
+  description: 'DOKU Checkout covering virtual accounts, QRIS, e-wallets, retail and cards.',
+  credentialFields: [
+    {
+      key: 'clientId',
+      label: 'Client ID',
+      required: true,
+      placeholder: 'MCH-…',
+      hint: 'From DOKU Back Office → Settings → API Keys.',
+    },
+    {
+      key: 'secretKey',
+      label: 'Secret Key',
+      type: 'password',
+      required: true,
+      hint: 'The Shared Key paired with the Client ID in DOKU Back Office.',
+    },
+    {
+      key: 'environment',
+      label: 'Environment',
+      type: 'select',
+      options: [
+        { value: 'sandbox', label: 'Sandbox' },
+        { value: 'production', label: 'Production' },
+      ],
+      hint: 'Must match the DOKU account these keys belong to. Defaults to sandbox.',
+    },
+    {
+      key: 'callbackUrl',
+      label: 'Notification URL',
+      hint: 'Paste this into DOKU Back Office → Notification URL.',
+      guide: [
+        'DOKU sends payment notifications to this URL with a signed non-SNAP header set.',
+        'PayKit also sends it per transaction as override_notification_url.',
+        'DOKU requires the override path to match the dashboard path, so keep both the same.',
+      ],
+      placeholder: 'https://pay.example.com/store/{slug}/doku',
+    },
+  ],
+  signupUrl: 'https://www.doku.com/',
+  docsUrl: 'https://developers.doku.com/',
+}
+
 const tripay: ProviderDefinition = {
   id: 'tripay',
   category: 'payment',
@@ -339,11 +385,12 @@ export const PROVIDER_REGISTRY: Record<string, ProviderDefinition> = {
   midtrans,
   xendit,
   aulaa,
+  doku,
 }
 
 /** Providers grouped by category, for the integrations list page. */
 export const PROVIDERS_BY_CATEGORY: Record<string, ProviderDefinition[]> = {
-  payment: [mayar, tripay, duitku, paypal, midtrans, xendit, aulaa],
+  payment: [mayar, tripay, duitku, paypal, midtrans, xendit, aulaa, doku],
 }
 
 /** Look up a single provider definition. Returns `undefined` for unknown ids. */

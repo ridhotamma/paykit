@@ -32,6 +32,7 @@ export type EmbeddedCheckoutSdk =
   | 'xendit-components'
   | 'paypal-js'
   | 'aulaa-checkout'
+  | 'doku-checkout'
 
 /**
  * How to drive one provider's browser SDK.
@@ -227,6 +228,37 @@ export function aulaaEmbeddedCheckout(paymentLink: string): EmbeddedCheckout {
       sdk: 'aulaa-checkout',
       source: AULAA_EMBED_SCRIPT_URL,
       token: paymentLink,
+    },
+  }
+}
+
+/** DOKU Checkout's overlay library for one deployment. */
+export function dokuCheckoutJsUrl(environment: 'sandbox' | 'production'): string {
+  return environment === 'production'
+    ? 'https://jokul.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js'
+    : 'https://sandbox.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js'
+}
+
+/**
+ * DOKU Checkout — the provider's supported in-page flow.
+ *
+ * The storefront loads {@link dokuCheckoutJsUrl} and calls
+ * `loadJokulCheckout(paymentUrl)`. The hosted page opens as a modal overlay;
+ * without the script the same URL is a normal redirect, so it also works as
+ * the iframe/redirect fallback.
+ */
+export function dokuEmbeddedCheckout(
+  paymentUrl: string,
+  environment: 'sandbox' | 'production',
+): EmbeddedCheckout {
+  return {
+    provider: 'doku',
+    preferred: 'script',
+    iframeUrl: paymentUrl,
+    script: {
+      sdk: 'doku-checkout',
+      source: dokuCheckoutJsUrl(environment),
+      token: paymentUrl,
     },
   }
 }

@@ -2,6 +2,8 @@ import { describe, expect, test } from 'vitest'
 
 import {
   aulaaEmbeddedCheckout,
+  dokuCheckoutJsUrl,
+  dokuEmbeddedCheckout,
   duitkuEmbeddedCheckout,
   duitkuJsUrl,
   iframeEmbeddedCheckout,
@@ -125,6 +127,32 @@ describe('Aulaa embedded checkout', () => {
         sdk: 'aulaa-checkout',
         source: 'https://payment.aulaa.co/embed.js',
         token: 'https://payment.aulaa.co/pay/f47ac10b',
+      },
+    })
+  })
+})
+
+describe('DOKU embedded checkout', () => {
+  test('points at the deployment matching the connection', () => {
+    expect(dokuCheckoutJsUrl('sandbox')).toBe(
+      'https://sandbox.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js',
+    )
+    expect(dokuCheckoutJsUrl('production')).toBe(
+      'https://jokul.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js',
+    )
+  })
+
+  test('opens the hosted checkout through the provider overlay', () => {
+    const checkout = dokuEmbeddedCheckout('https://sandbox.doku.com/checkout-link-v2/abc', 'sandbox')
+
+    expect(checkout).toEqual({
+      provider: 'doku',
+      preferred: 'script',
+      iframeUrl: 'https://sandbox.doku.com/checkout-link-v2/abc',
+      script: {
+        sdk: 'doku-checkout',
+        source: 'https://sandbox.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js',
+        token: 'https://sandbox.doku.com/checkout-link-v2/abc',
       },
     })
   })

@@ -1,19 +1,22 @@
 import { describe, expect, test } from 'vitest'
 
 import { aulaaAdapter } from './aulaa'
+import { dokuAdapter } from './doku'
 import { midtransAdapter } from './midtrans'
 import { paypalAdapter } from './paypal'
 import { xenditAdapter } from './xendit'
 
 describe('currencyUnsupportedReason', () => {
-  test('aulaa, xendit and midtrans settle IDR only', () => {
+  test('aulaa, doku, xendit and midtrans settle IDR only', () => {
     expect(xenditAdapter.currencyUnsupportedReason?.({}, {}, 'IDR')).toBeNull()
     expect(midtransAdapter.currencyUnsupportedReason?.({}, {}, 'IDR')).toBeNull()
     expect(aulaaAdapter.currencyUnsupportedReason?.({}, {}, 'IDR')).toBeNull()
+    expect(dokuAdapter.currencyUnsupportedReason?.({}, {}, 'IDR')).toBeNull()
     expect(xenditAdapter.currencyUnsupportedReason?.({}, {}, undefined)).toBeNull()
     expect(xenditAdapter.currencyUnsupportedReason?.({}, {}, 'USD')).toContain('IDR')
     expect(midtransAdapter.currencyUnsupportedReason?.({}, {}, 'USD')).toContain('IDR')
     expect(aulaaAdapter.currencyUnsupportedReason?.({}, {}, 'USD')).toContain('IDR')
+    expect(dokuAdapter.currencyUnsupportedReason?.({}, {}, 'USD')).toContain('IDR')
   })
 
   test('paypal must match the connection currency, and an IDR shop can never match', () => {

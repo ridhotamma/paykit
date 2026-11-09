@@ -72,6 +72,19 @@ const CHANNEL_SLUGS: Readonly<Record<string, string>> = {
   CIMB_NIAGA_VA: 'cimb-niaga',
   MAYBANK_VA: 'maybank',
   SHOPEE_PAY: 'shopee-pay',
+  // DOKU Checkout channel ids.
+  VIRTUAL_ACCOUNT_BCA: 'bca',
+  VIRTUAL_ACCOUNT_BANK_MANDIRI: 'mandiri',
+  VIRTUAL_ACCOUNT_BANK_SYARIAH_MANDIRI: 'bsi',
+  VIRTUAL_ACCOUNT_BRI: 'bri',
+  VIRTUAL_ACCOUNT_BNI: 'bni',
+  VIRTUAL_ACCOUNT_BANK_PERMATA: 'permata',
+  VIRTUAL_ACCOUNT_BANK_CIMB: 'cimb-niaga',
+  VIRTUAL_ACCOUNT_BANK_DANAMON: 'danamon',
+  EMONEY_OVO: 'ovo',
+  EMONEY_SHOPEE_PAY: 'shopee-pay',
+  EMONEY_DANA: 'dana',
+  EMONEY_LINKAJA: 'linkaja',
 }
 
 /**

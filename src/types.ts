@@ -23,6 +23,7 @@ export type IntegrationProvider =
   | 'xendit'
   | 'paypal'
   | 'aulaa'
+  | 'doku'
 
 /** The lifecycle state of a connection — not the provider itself. */
 export type ConnectionStatus = 'connected' | 'disconnected' | 'error'

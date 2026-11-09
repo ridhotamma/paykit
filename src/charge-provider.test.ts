@@ -16,6 +16,9 @@ describe('orderChargeProvider', () => {
     expect(
       orderChargeProvider({ paymentLink: 'https://payment.aulaa.co/pay/f47ac10b' }),
     ).toBe('aulaa')
+    expect(
+      orderChargeProvider({ paymentLink: 'https://sandbox.doku.com/checkout-link-v2/abc' }),
+    ).toBe('doku')
   })
 
   test('a look-alike host is not the gateway', () => {

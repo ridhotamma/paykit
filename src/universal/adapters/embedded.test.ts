@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import { aulaaAdapter } from './aulaa'
+import { dokuAdapter } from './doku'
 import { duitkuAdapter } from './duitku'
 import { mayarAdapter } from './mayar'
 import { midtransAdapter } from './midtrans'
@@ -13,6 +14,7 @@ describe('embedded checkout capability', () => {
     for (const adapter of [
       tripayAdapter,
       aulaaAdapter,
+      dokuAdapter,
       duitkuAdapter,
       mayarAdapter,
       midtransAdapter,
