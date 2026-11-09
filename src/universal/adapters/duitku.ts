@@ -7,6 +7,7 @@ import {
   buildDuitkuInquiryParams,
 } from '../../duitku'
 import { digitalChannelLogoPath } from '../../channel-logos'
+import { duitkuEmbeddedCheckout } from '../../embedded'
 import type {
   PaymentChannelCategory,
   UniversalChargeParams,
@@ -71,6 +72,7 @@ export const duitkuAdapter: UniversalPaymentAdapter = {
     supportsChannels: true,
     supportsStatusRefresh: true,
     supportsTestConnection: true,
+    supportsEmbeddedCheckout: true,
   },
 
   async getChannels(
@@ -190,6 +192,14 @@ export const duitkuAdapter: UniversalPaymentAdapter = {
         vaNumber: payment.vaNumber ?? null,
         qrString: payment.qrString ?? null,
         qrUrl: null,
+        // Duitku Pop is the provider-supported in-page flow: `duitku.js`
+        // takes the inquiry reference and opens its own overlay iframe. The
+        // hosted `paymentUrl` stays alongside as an iframe/redirect fallback.
+        embedded: duitkuEmbeddedCheckout(
+          payment.reference,
+          parsed.credentials.environment,
+          payment.paymentUrl,
+        ),
       }
     } catch (error) {
       throw new Error(describeDuitkuError(error))

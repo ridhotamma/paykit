@@ -12,6 +12,7 @@ export * from './webhook'
 export * from './charge'
 export * from './payment'
 export * from './transactions'
+export { paypalEmbeddedCheckout, paypalSdkUrl } from '../embedded'
 
 /* -------------------------------------------------------------------------- */
 /* Checkout channels                                                          */

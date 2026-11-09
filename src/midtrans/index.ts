@@ -13,6 +13,7 @@ export * from './webhook'
 export * from './charge'
 export * from './payment'
 export * from './transactions'
+export { midtransEmbeddedCheckout, midtransSnapUrl } from '../embedded'
 
 /* -------------------------------------------------------------------------- */
 /* Checkout channels                                                          */

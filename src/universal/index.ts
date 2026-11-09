@@ -1,4 +1,5 @@
 export * from './types'
+export * from '../embedded'
 export * from './registry'
 export * from './gateway-return'
 export * from './expiry'

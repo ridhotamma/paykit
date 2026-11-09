@@ -7,6 +7,7 @@ import {
   buildTripayTransactionParams,
 } from '../../tripay'
 import { digitalChannelLogoPath } from '../../channel-logos'
+import { iframeEmbeddedCheckout } from '../../embedded'
 import type {
   PaymentChannelCategory,
   UniversalChargeParams,
@@ -95,6 +96,7 @@ export const tripayAdapter: UniversalPaymentAdapter = {
     supportsChannels: true,
     supportsStatusRefresh: true,
     supportsTestConnection: true,
+    supportsEmbeddedCheckout: true,
   },
 
   async getChannels(
@@ -193,6 +195,10 @@ export const tripayAdapter: UniversalPaymentAdapter = {
         qrString: tx.qr_string ?? null,
         qrUrl: tx.qr_url ?? null,
         expiresAt: typeof tx.expired_time === 'number' ? tx.expired_time : null,
+        // Tripay has no browser SDK: the hosted checkout page is the only
+        // in-page option, and the storefront must cope with channels that
+        // still need a top-level window.
+        embedded: iframeEmbeddedCheckout('tripay', tx.checkout_url),
       }
     } catch (error) {
       throw new Error(describeTripayError(error))

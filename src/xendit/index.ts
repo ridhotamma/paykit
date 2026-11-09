@@ -13,6 +13,7 @@ export * from './webhook'
 export * from './charge'
 export * from './payment'
 export * from './transactions'
+export { xenditComponentsEmbeddedCheckout, xenditIframeCheckout } from '../embedded'
 
 /* -------------------------------------------------------------------------- */
 /* Checkout channels                                                          */

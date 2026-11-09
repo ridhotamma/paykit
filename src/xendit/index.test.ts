@@ -8,6 +8,7 @@ import {
   xenditRemainingAmountFor,
 } from './charge'
 import {
+  createXenditSession,
   getXenditInvoice,
   readXenditCredentials,
   verifyXenditSecretKey,
@@ -95,6 +96,25 @@ describe('buildXenditSessionBody', () => {
   test('an unknown channel offers every active method instead of failing', () => {
     const body = buildXenditSessionBody({ order, channel: 'LoadsaMoney', lines })
     expect(body.allowed_payment_channels).toBeUndefined()
+  })
+
+  test('embedded checkout creates a COMPONENTS session with the origin allow-list', () => {
+    const body = buildXenditSessionBody({
+      order,
+      channel: 'QRIS',
+      lines,
+      returnUrl: 'https://shop.test/order/confirmation',
+      checkout: 'embedded',
+      embedOrigins: ['https://shop.test'],
+    })
+
+    expect(body.mode).toBe('COMPONENTS')
+    expect(body.components_configuration).toEqual({ origins: ['https://shop.test'] })
+    // The hosted page's return URLs do not exist for a components session.
+    expect(body.success_return_url).toBeUndefined()
+    expect(body.cancel_return_url).toBeUndefined()
+    expect(body.allowed_payment_channels).toEqual(['QRIS'])
+    expect(body.amount).toBe(125000)
   })
 
   test('a re-charge appends an attempt token to the reference id', () => {
@@ -417,6 +437,73 @@ describe('sdk key check', () => {
       })) as unknown as typeof fetch
     try {
       await expect(verifyXenditSecretKey(credentials)).rejects.toBeInstanceOf(XenditApiError)
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe('session creation', () => {
+  test('a COMPONENTS session is accepted through its components SDK key, without a link', async () => {
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = (async () =>
+      new Response(
+        JSON.stringify({
+          payment_session_id: 'ps-1',
+          reference_id: 'INV-1',
+          status: 'ACTIVE',
+          amount: 125000,
+          currency: 'IDR',
+          expires_at: null,
+          payment_id: null,
+          components_sdk_key: 'session-key',
+          metadata: null,
+        }),
+        { status: 201, headers: { 'content-type': 'application/json' } },
+      )) as unknown as typeof fetch
+
+    try {
+      const session = await createXenditSession(
+        { secretKey: 'xnd_development_x', webhookToken: 't' },
+        {
+          reference_id: 'INV-1',
+          session_type: 'PAY',
+          mode: 'COMPONENTS',
+          amount: 125000,
+          currency: 'IDR',
+          country: 'ID',
+          components_configuration: { origins: ['https://shop.test'] },
+        },
+      )
+      expect(session.payment_link_url).toBeNull()
+      expect(session.components_sdk_key).toBe('session-key')
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
+  test('a session with neither a link nor a components key fails the charge', async () => {
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify({ payment_session_id: 'ps-1', status: 'ACTIVE' }), {
+        status: 201,
+        headers: { 'content-type': 'application/json' },
+      })) as unknown as typeof fetch
+
+    try {
+      await expect(
+        createXenditSession(
+          { secretKey: 'xnd_development_x', webhookToken: 't' },
+          {
+            reference_id: 'INV-1',
+            session_type: 'PAY',
+            mode: 'PAYMENT_LINK',
+            amount: 125000,
+            currency: 'IDR',
+            country: 'ID',
+          },
+        ),
+      ).rejects.toBeInstanceOf(XenditApiError)
     } finally {
       globalThis.fetch = originalFetch
     }

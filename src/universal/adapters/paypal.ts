@@ -16,6 +16,7 @@ import {
   toPaypalCaptureAmount,
   type PaypalCredentials,
 } from '../../paypal'
+import { paypalEmbeddedCheckout } from '../../embedded'
 import type {
   UniversalChargeParams,
   UniversalChargeResult,
@@ -72,6 +73,7 @@ export const paypalAdapter: UniversalPaymentAdapter = {
     supportsChannels: true,
     supportsStatusRefresh: true,
     supportsTestConnection: true,
+    supportsEmbeddedCheckout: true,
   },
 
   currencyUnsupportedReason(credentials, config, currency) {
@@ -147,6 +149,14 @@ export const paypalAdapter: UniversalPaymentAdapter = {
         vaNumber: null,
         qrString: null,
         qrUrl: null,
+        // PayPal's approval page is `X-Frame-Options: SAMEORIGIN`, so the
+        // only in-page flow is the JS SDK's Buttons component around this
+        // same order id. The approval link stays the redirect fallback.
+        embedded: paypalEmbeddedCheckout(
+          created.id,
+          parsed.credentials.clientId,
+          parsed.credentials.currency,
+        ),
       }
     } catch (error) {
       throw new Error(describePaypalError(error))

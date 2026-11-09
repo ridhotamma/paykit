@@ -39,6 +39,7 @@ import { z } from 'zod'
 import { mergeCredentialBlobs } from '../credentials'
 
 export { Duitku, DuitkuApiError, DuitkuConfigError, DuitkuSignatureError, PaymentMethod }
+export { duitkuEmbeddedCheckout, duitkuJsUrl } from '../embedded'
 
 /** A verified callback: the form fields Duitku sent, plus the derived verdict. */
 export type DuitkuCallbackPayload = CallbackPayload & { isPaid: boolean }

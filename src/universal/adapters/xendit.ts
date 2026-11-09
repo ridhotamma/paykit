@@ -24,6 +24,7 @@ import {
   type XenditCredentials,
 } from '../../xendit'
 import { digitalChannelLogoPath } from '../../channel-logos'
+import { xenditComponentsEmbeddedCheckout, xenditIframeCheckout } from '../../embedded'
 import type {
   PaymentChannelCategory,
   UniversalChargeParams,
@@ -150,6 +151,7 @@ export const xenditAdapter: UniversalPaymentAdapter = {
     supportsChannels: true,
     supportsStatusRefresh: true,
     supportsTestConnection: true,
+    supportsEmbeddedCheckout: true,
   },
 
   currencyUnsupportedReason(_credentials, _config, currency) {
@@ -215,6 +217,18 @@ export const xenditAdapter: UniversalPaymentAdapter = {
       }
     }
 
+    const embeddedCheckout = params.checkout === 'embedded'
+    const embedOrigins = Array.from(
+      new Set((params.embedOrigins ?? []).map((origin) => origin.trim()).filter(Boolean)),
+    )
+    // Xendit refuses a COMPONENTS session without an allow-list, and a
+    // session that cannot mount is worse than an explicit refusal here.
+    if (embeddedCheckout && embedOrigins.length === 0) {
+      throw new Error(
+        'Embed origins are required for Xendit embedded checkout (the storefront URLs allowed to mount it).',
+      )
+    }
+
     try {
       const expiresAt = toXenditExpiryDate(params.expiresAt)
       const session = await createXenditSession(
@@ -232,11 +246,19 @@ export const xenditAdapter: UniversalPaymentAdapter = {
           // The session dies with the order — see `toXenditExpiryDate`.
           // Absent, Xendit's own 30-minute default applies.
           ...(expiresAt ? { expiresAt } : {}),
+          checkout: embeddedCheckout ? 'embedded' : 'redirect',
+          ...(embeddedCheckout ? { embedOrigins } : {}),
         }),
       )
 
+      if (embeddedCheckout && !session.components_sdk_key) {
+        throw new Error('Xendit answered without a components SDK key for the embedded session.')
+      }
+
       return {
-        paymentLink: session.payment_link_url!,
+        // A COMPONENTS session has no hosted page; `embedded` is the only
+        // way to pay it.
+        paymentLink: session.payment_link_url,
         paymentReference: session.payment_session_id,
         paymentMethodLabel: (channel ? xenditChannelLabel(channel) : null) ?? 'Xendit',
         paymentLogo: channel ? digitalChannelLogoPath('xendit', channel) : null,
@@ -246,6 +268,14 @@ export const xenditAdapter: UniversalPaymentAdapter = {
         vaNumber: null,
         qrString: null,
         qrUrl: null,
+        // A native COMPONENTS session exposes the in-page SDK; a hosted
+        // session exposes the frameable checkout page. Either way the
+        // descriptor is data the storefront can serialise to the browser.
+        embedded: session.components_sdk_key
+          ? xenditComponentsEmbeddedCheckout(session.components_sdk_key)
+          : session.payment_link_url
+            ? xenditIframeCheckout(session.payment_link_url)
+            : null,
       }
     } catch (error) {
       throw new Error(describeXenditError(error))

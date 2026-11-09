@@ -244,7 +244,11 @@ export interface XenditCreateSessionRequest {
   /** The PayKit `orderNumber` — the contract the webhook handler settles on. */
   reference_id: string
   session_type: 'PAY'
-  mode: 'PAYMENT_LINK'
+  /**
+   * `PAYMENT_LINK` returns a hosted `payment_link_url`; `COMPONENTS` returns
+   * a `components_sdk_key` for Xendit's in-page SDK instead.
+   */
+  mode: 'PAYMENT_LINK' | 'COMPONENTS'
   /** Integer minor units — the only amount ever charged is the order's remaining balance. */
   amount: number
   currency: string
@@ -258,6 +262,13 @@ export interface XenditCreateSessionRequest {
   /** Restrict the hosted page to these channel codes; omitted means every active channel. */
   allowed_payment_channels?: string[]
   items?: XenditSessionItem[]
+  /**
+   * Required for `mode: COMPONENTS`: the browser origins allowed to mount the
+   * session's components. Xendit rejects the session for any other origin.
+   */
+  components_configuration?: {
+    origins: string[]
+  }
   /**
    * Free-form merchant data echoed back on the session. PayKit stores the
    * charged channel in `paykit_channel` so the webhook can label the
@@ -273,6 +284,11 @@ export interface XenditPaymentSession {
   amount: number | null
   currency: string | null
   payment_link_url: string | null
+  /**
+   * The short-lived frontend key for `mode: COMPONENTS`, absent on a
+   * `PAYMENT_LINK` session. Never store or log it.
+   */
+  components_sdk_key: string | null
   expires_at: string | null
   payment_id: string | null
   /** Echoed merchant metadata; PayKit stores the charged channel in it. */
@@ -288,6 +304,8 @@ function toPaymentSession(record: Record<string, unknown>): XenditPaymentSession
     amount: typeof record.amount === 'number' ? record.amount : null,
     currency: typeof record.currency === 'string' ? record.currency : null,
     payment_link_url: typeof record.payment_link_url === 'string' ? record.payment_link_url : null,
+    components_sdk_key:
+      typeof record.components_sdk_key === 'string' ? record.components_sdk_key : null,
     expires_at: typeof record.expires_at === 'string' ? record.expires_at : null,
     payment_id: typeof record.payment_id === 'string' ? record.payment_id : null,
     metadata:
@@ -328,8 +346,15 @@ export async function createXenditSession(
       parsed,
     )
   }
-  if (!session.payment_link_url) {
-    throw new XenditApiError(response.status, 'Xendit answered without a payment link URL.', parsed)
+  // One of the two UI handles is required: a hosted link for PAYMENT_LINK,
+  // or the frontend SDK key for COMPONENTS. A session with neither cannot be
+  // paid and must fail the charge rather than store a dead reference.
+  if (!session.payment_link_url && !session.components_sdk_key) {
+    throw new XenditApiError(
+      response.status,
+      'Xendit answered without a payment link URL or components SDK key.',
+      parsed,
+    )
   }
   return session
 }

@@ -5,6 +5,7 @@ import {
   describeMayarError,
   readMayarCredentials,
 } from '../../mayar'
+import { iframeEmbeddedCheckout } from '../../embedded'
 import type {
   UniversalChargeParams,
   UniversalChargeResult,
@@ -35,6 +36,7 @@ export const mayarAdapter: UniversalPaymentAdapter = {
     supportsChannels: false,
     supportsStatusRefresh: false,
     supportsTestConnection: true,
+    supportsEmbeddedCheckout: true,
   },
 
   async getChannels(): Promise<readonly UniversalPaymentChannel[]> {
@@ -72,6 +74,9 @@ export const mayarAdapter: UniversalPaymentAdapter = {
           paymentReference: invoice.id,
           paymentMethodLabel: 'Mayar',
           paymentLogo: null,
+          // Mayar has no browser SDK; the hosted invoice is the in-page
+          // option, with a redirect fallback for channels that need one.
+          embedded: iframeEmbeddedCheckout('mayar', invoice.link),
         }
       }
 
@@ -88,6 +93,7 @@ export const mayarAdapter: UniversalPaymentAdapter = {
         paymentReference: paymentLink.id,
         paymentMethodLabel: 'Mayar',
         paymentLogo: null,
+        embedded: iframeEmbeddedCheckout('mayar', paymentLink.link),
       }
     } catch (error) {
       throw new Error(describeMayarError(error))

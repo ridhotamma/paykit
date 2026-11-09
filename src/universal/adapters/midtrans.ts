@@ -15,6 +15,7 @@ import {
   readMidtransCredentials,
 } from '../../midtrans'
 import { digitalChannelLogoPath } from '../../channel-logos'
+import { iframeEmbeddedCheckout, midtransEmbeddedCheckout } from '../../embedded'
 import type {
   PaymentChannelCategory,
   UniversalChargeParams,
@@ -84,6 +85,7 @@ export const midtransAdapter: UniversalPaymentAdapter = {
     supportsChannels: true,
     supportsStatusRefresh: true,
     supportsTestConnection: true,
+    supportsEmbeddedCheckout: true,
   },
 
   currencyUnsupportedReason(_credentials, _config, currency) {
@@ -160,6 +162,18 @@ export const midtransAdapter: UniversalPaymentAdapter = {
         vaNumber: null,
         qrString: null,
         qrUrl: null,
+        // Snap is the provider-supported embedded flow: `snap.embed(token,
+        // { embedId })` renders the checkout in a container, `snap.pay`
+        // opens it as a popup. It needs the public client key at script-load
+        // time, so a connection without one keeps the iframe/redirect page.
+        embedded: parsed.credentials.clientKey
+          ? midtransEmbeddedCheckout(
+              snap.token,
+              parsed.credentials.clientKey,
+              parsed.credentials.environment,
+              snap.redirect_url,
+            )
+          : iframeEmbeddedCheckout('midtrans', snap.redirect_url),
       }
     } catch (error) {
       throw new Error(describeMidtransError(error))

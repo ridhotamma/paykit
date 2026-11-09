@@ -14,6 +14,7 @@ export * from './credentials'
 export * from './credentials-envelope'
 export * from './charge-provider'
 export * from './webhook-auth'
+export * from './embedded'
 
 /* Shared primitives, exported for hosts that write their own adapters. */
 export * from './order-status'

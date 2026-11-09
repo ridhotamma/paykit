@@ -6,6 +6,7 @@
  * requests, status checks, and lifecycle events across the platform.
  */
 
+import type { EmbeddedCheckout } from '../embedded'
 import type { OrderPaymentStatus, OrderStatus } from '../order-status'
 
 export type PaymentChannelCategory =
@@ -31,6 +32,15 @@ export interface UniversalGatewayCapabilities {
   supportsChannels: boolean
   supportsStatusRefresh: boolean
   supportsTestConnection: boolean
+  /**
+   * Whether a charge can carry an {@link EmbeddedCheckout} descriptor — an
+   * iframe URL, a provider browser SDK, or both.
+   *
+   * Not every provider supports the same presentation: Tripay and Mayar have
+   * a hosted page only, Duitku has Duitku Pop, Xendit has Components, and
+   * PayPal only exposes its JS SDK because its approval page forbids framing.
+   */
+  supportsEmbeddedCheckout: boolean
 }
 
 export interface UniversalTestResult {
@@ -110,10 +120,32 @@ export interface UniversalChargeParams {
    * settling a cancelled order.
    */
   expiresAt?: string | null
+  /**
+   * Ask for an embedded checkout where the provider has a distinct embedded
+   * API.
+   *
+   * `redirect` (the default) keeps the hosted payment page. `embedded` creates
+   * a native embedded session when one exists — currently Xendit Components —
+   * and leaves the other providers on their normal hosted charge while still
+   * returning an {@link UniversalChargeResult.embedded} descriptor.
+   */
+  checkout?: 'redirect' | 'embedded'
+  /**
+   * Browser origins allowed to mount the embedded checkout.
+   *
+   * Required by Xendit Components (`components_configuration.origins`) and
+   * ignored by the other adapters. The origin is the storefront's own URL,
+   * e.g. `https://shop.example.com`.
+   */
+  embedOrigins?: readonly string[]
 }
 
 export interface UniversalChargeResult {
-  paymentLink: string
+  /**
+   * The provider-hosted checkout page, or `null` when the charge only exists
+   * as an embedded session (Xendit Components has no payment link URL).
+   */
+  paymentLink: string | null
   paymentReference: string
   paymentMethodLabel: string
   /**
@@ -138,6 +170,15 @@ export interface UniversalChargeResult {
   qrUrl?: string | null
   /** Gateway-reported expiry as unix seconds, when the provider states one. */
   expiresAt?: number | null
+  /**
+   * How to present this payment inside the storefront instead of redirecting
+   * to `paymentLink`. Present whenever the provider has an embeddable UI; the
+   * storefront may still choose `paymentLink` (or both, as a fallback).
+   *
+   * See `EmbeddedCheckout` for the two presentations and the browser SDK each
+   * `script.sdk` value requires.
+   */
+  embedded?: EmbeddedCheckout | null
 }
 
 export interface UniversalRefreshParams {

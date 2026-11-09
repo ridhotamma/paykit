@@ -153,6 +153,16 @@ export interface BuildXenditSessionInput {
   existingPaymentReference?: string | null
   /** ISO 8601 instant the order's payment deadline lands on. */
   expiresAt?: string | null
+  /**
+   * `embedded` creates a `COMPONENTS` session for Xendit's in-page SDK;
+   * `redirect` (the default) keeps the hosted `PAYMENT_LINK` page.
+   */
+  checkout?: 'redirect' | 'embedded'
+  /**
+   * Browser origins allowed to mount the components. Required for
+   * `checkout: 'embedded'`; Xendit rejects a `COMPONENTS` session without it.
+   */
+  embedOrigins?: readonly string[]
 }
 
 /**
@@ -177,6 +187,8 @@ export function buildXenditSessionBody({
   currency,
   existingPaymentReference,
   expiresAt,
+  checkout = 'redirect',
+  embedOrigins,
 }: BuildXenditSessionInput): XenditCreateSessionRequest {
   const remaining = xenditRemainingAmountFor(order)
   const currencyCode = (currency ?? XENDIT_SESSION_CURRENCY).trim().toUpperCase()
@@ -238,18 +250,26 @@ export function buildXenditSessionBody({
   ]
 
   const channels = xenditPaymentChannelsFor(channel ?? null)
+  const embedded = checkout === 'embedded'
 
   return {
     reference_id: chargeAttemptReference(order.orderNumber, existingPaymentReference),
     session_type: 'PAY',
-    mode: 'PAYMENT_LINK',
+    // A COMPONENTS session has no hosted page, so the return URLs (which the
+    // hosted page would use) are omitted; the storefront owns the UI and the
+    // webhook remains the settlement source.
+    mode: embedded ? 'COMPONENTS' : 'PAYMENT_LINK',
     amount: remaining,
     currency: currencyCode,
     country: XENDIT_SESSION_COUNTRY,
     description: `Pembayaran pesanan ${order.orderNumber}`.slice(0, 1000),
     locale: 'id',
     ...(expiresAt ? { expires_at: expiresAt } : {}),
-    ...(returnUrl ? { success_return_url: returnUrl, cancel_return_url: returnUrl } : {}),
+    ...(embedded
+      ? { components_configuration: { origins: [...(embedOrigins ?? [])] } }
+      : returnUrl
+        ? { success_return_url: returnUrl, cancel_return_url: returnUrl }
+        : {}),
     ...(channels ? { allowed_payment_channels: channels } : {}),
     items,
     metadata: {

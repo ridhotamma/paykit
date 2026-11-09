@@ -23,14 +23,14 @@ Every Indonesian payment gateway speaks a slightly different dialect: different 
 
 ## Supported gateways
 
-| Gateway  | Channels | Charge | Status refresh | Webhook verification |
-| -------- | :------: | :----: | :------------: | :------------------: |
-| Tripay   |    ✅    |   ✅   |       ✅       |    HMAC-SHA256       |
-| Duitku   |    ✅    |   ✅   |       ✅       |    MD5 signature     |
-| Mayar    |    ✅    |   ✅   |       ✅       |    Callback token    |
-| Midtrans |    ✅    |   ✅   |       ✅       |    SHA-512 digest    |
-| Xendit   |    ✅    |   ✅   |       ✅       |    Callback token    |
-| PayPal   |    ✅    |   ✅   |       ✅       |    Webhook signature |
+| Gateway  | Channels | Charge | Status refresh | Webhook verification | Embedded checkout |
+| -------- | :------: | :----: | :------------: | :------------------: | :---------------: |
+| Tripay   |    ✅    |   ✅   |       ✅       |    HMAC-SHA256       | iframe            |
+| Duitku   |    ✅    |   ✅   |       ✅       |    MD5 signature     | Pop JS            |
+| Mayar    |    ✅    |   ✅   |       ✅       |    Callback token    | iframe            |
+| Midtrans |    ✅    |   ✅   |       ✅       |    SHA-512 digest    | Snap JS           |
+| Xendit   |    ✅    |   ✅   |       ✅       |    Callback token    | Components / iframe |
+| PayPal   |    ✅    |   ✅   |       ✅       |    Webhook signature | JS SDK            |
 
 ## Quick start
 
@@ -63,7 +63,7 @@ const charge = await adapter.charge(credentials, config, {
   currency: 'IDR',
 })
 
-console.log(charge.paymentLink) // hosted checkout page
+console.log(charge.paymentLink) // hosted checkout page (null when embedded-only)
 console.log(charge.vaNumber)    // …or the number to render yourself
 ```
 
@@ -88,6 +88,61 @@ import { readMayarCredentials, createMayarClient } from '@ridhotamma/paykit/maya
 import { readDuitkuCredentials, createDuitkuClient } from '@ridhotamma/paykit/duitku'
 import { readPaypalCredentials, createPaypalClients } from '@ridhotamma/paykit/paypal'
 import { readMidtransCredentials, createMidtransSnapClient } from '@ridhotamma/paykit/midtrans'
+```
+
+## Embedded checkout
+
+Every charge also returns an `embedded` descriptor when the gateway has an in-page UI. It is plain, serialisable data — PayKit does not render anything or load a browser SDK itself — so a storefront can send it to the browser and decide whether to frame the hosted page or drive the provider's SDK:
+
+```ts
+const charge = await adapter.charge(credentials, config, {
+  // …the usual order, lines, channel and URLs
+  // Ask for the provider's native embedded flow where one exists.
+  checkout: 'embedded',
+  // Xendit Components only: the origins allowed to mount the session.
+  embedOrigins: ['https://shop.example.com'],
+})
+
+charge.paymentLink // still the hosted page — null for Xendit Components
+charge.embedded
+// {
+//   provider: 'duitku',
+//   preferred: 'script',
+//   iframeUrl: 'https://app-sandbox.duitku.com/redirect_checkout?reference=…',
+//   script: {
+//     sdk: 'duitku-pop',
+//     source: 'https://app-sandbox.duitku.com/lib/js/duitku.js',
+//     token: '…duitku reference…'
+//   }
+// }
+```
+
+Two presentations exist:
+
+| `preferred` | Frontend behaviour |
+| ----------- | ------------------ |
+| `iframe` | Render `embedded.iframeUrl` in an `<iframe>`. |
+| `script` | Load `embedded.script.source` and drive that SDK with `embedded.script.token` (plus `clientKey` when present). |
+
+Provider specifics:
+
+| Gateway | `checkout: 'embedded'` | Frontend |
+| ------- | ---------------------- | -------- |
+| Duitku | No API change; still returns the hosted `paymentUrl` as fallback. | Load `duitku.js`, call `checkout.process(reference, options)`. |
+| Xendit | Creates a `COMPONENTS` Payment Session and returns `components_sdk_key`. Requires `embedOrigins`. | Use `xendit-components-web`; mount the channel components into your own containers and submit from your button. |
+| Midtrans | No API change; the Snap token is returned. | Load `snap.js` with `data-client-key`, then `snap.embed(token, { embedId })` or `snap.pay(token)`. |
+| Tripay | No API change. | Iframe the `checkout_url`; keep the redirect as fallback. |
+| Mayar | No API change. | Iframe the invoice/payment link; keep the redirect as fallback. |
+| PayPal | No API change. | Load the PayPal JS SDK (`components=buttons`) and render `paypal.Buttons` around the returned order id. |
+
+`paymentLink` remains the safe fallback everywhere except Xendit's `COMPONENTS` mode, which has no hosted page (it is `null` there). Some payment methods — bank pages, 3DS, wallet app-switches — can still demand a top-level window even when the hosted page loads in a frame, so treat the descriptor as a hint, not a guarantee.
+
+Embedded callbacks are UI feedback only. Settlement always comes from the HTTP webhook, exactly as it does for a redirect flow.
+
+The static capability is also on the adapter:
+
+```ts
+adapter.capabilities.supportsEmbeddedCheckout // true
 ```
 
 ## Webhooks
